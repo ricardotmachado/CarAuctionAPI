@@ -1,4 +1,4 @@
-namespace CarAuctionAPI.Models;
+namespace CarAuctionAPI.Entities;
 
 public class Sedan : Vehicle
 {

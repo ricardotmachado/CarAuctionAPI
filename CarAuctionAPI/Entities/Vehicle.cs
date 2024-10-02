@@ -1,8 +1,9 @@
-namespace CarAuctionAPI.DTOs;
+namespace CarAuctionAPI.Entities;
 
-public class VehicleDTO
+public class Vehicle
 {
-    public string VehicleType { get; set; }
+    public Guid Id { get; set; }
+    public string VehicleType { get; set; } 
     public string Manufacturer { get; set; }
     public string Model { get; set; }
     public int Year { get; set; }

@@ -1,5 +1,5 @@
 using CarAuctionAPI.Data;
-using CarAuctionAPI.Models;
+using CarAuctionAPI.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarAuctionAPI.Repositories;

@@ -1,5 +1,5 @@
 using CarAuctionAPI.DTOs;
-using CarAuctionAPI.Models;
+using CarAuctionAPI.Entities;
 using CarAuctionAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,22 +21,7 @@ public class AuctionController : ControllerBase
     [HttpPost("add-vehicle")]
     public async Task<IActionResult> AddVehicle([FromBody] VehicleDTO vehicleDto)
     {
-        Vehicle vehicle = vehicleDto.VehicleType.ToLower() switch
-        {
-            "sedan" => new Sedan { NumberOfDoors = vehicleDto.NumberOfDoors ?? 0 },
-            "suv" => new SUV { NumberOfSeats = vehicleDto.NumberOfSeats ?? 0 },
-            "hatchback" => new Hatchback { NumberOfDoors = vehicleDto.NumberOfDoors ?? 0 },
-            "truck" => new Truck { LoadCapacity = vehicleDto.LoadCapacity ?? 0 },
-            _ => throw new System.Exception("Invalid vehicle type")
-        };
-
-        vehicle.VehicleType = vehicleDto.VehicleType;
-        vehicle.Manufacturer = vehicleDto.Manufacturer;
-        vehicle.Model = vehicleDto.Model;
-        vehicle.Year = vehicleDto.Year;
-        vehicle.StartingBid = vehicleDto.StartingBid;
-
-        await _vehicleService.AddVehicleAsync(vehicle);
+        var vehicle = await _vehicleService.AddVehicleAsync(vehicleDto);
         return Ok(vehicle);
     }
 
@@ -48,23 +33,23 @@ public class AuctionController : ControllerBase
     }
 
     [HttpPost("start-auction/{vehicleId}")]
-    public async Task<IActionResult> StartAuction(int vehicleId)
+    public async Task<IActionResult> StartAuction(Guid vehicleId)
     {
-        _auctionService.StartAuction(vehicleId);
-        return Ok();
+        var auction = await _auctionService.StartAuction(vehicleId);
+        return Ok(auction);
     }
 
     [HttpPost("place-bid/{auctionId}")]
-    public async Task<IActionResult> PlaceBid(int auctionId, decimal bidAmount)
+    public async Task<IActionResult> PlaceBid(Guid auctionId, decimal bidAmount)
     {
-        _auctionService.PlaceBid(auctionId, bidAmount);
+        await _auctionService.PlaceBid(auctionId, bidAmount);
         return Ok();
     }
 
     [HttpPost("close-auction/{auctionId}")]
-    public async Task<IActionResult> CloseAuction(int auctionId)
+    public async Task<IActionResult> CloseAuction(Guid auctionId)
     {
-        _auctionService.CloseAuction(auctionId);
+        await _auctionService.CloseAuction(auctionId);
         return Ok();
     }
 }

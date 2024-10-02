@@ -1,53 +1,65 @@
-using CarAuctionAPI.Models;
-using System.Collections.Generic;
-using System.Linq;
+using CarAuctionAPI.Entities;
+using CarAuctionAPI.Repositories;
 
 namespace CarAuctionAPI.Services;
 
     public class AuctionService : IAuctionService
     {
-        private readonly List<Auction> _auctions = new();
-        private readonly IVehicleService _vehicleService;
+        private readonly IAuctionRepository _auctionRepository;
+        private readonly IVehicleRepository _vehicleRepository;
 
-        public AuctionService(IVehicleService vehicleService)
+        public AuctionService(IAuctionRepository auctionRepository, IVehicleRepository vehicleRepository)
         {
-            _vehicleService = vehicleService;
+            _auctionRepository = auctionRepository;
+            _vehicleRepository = vehicleRepository;
         }
 
-        public void StartAuction(int vehicleId)
+        public async Task<Auction> StartAuction(Guid vehicleId)
         {
-            // var vehicle = _vehicleService.GetVehicleById(vehicleId);
-            // if (vehicle == null)
-            // {
-            //     throw new System.Exception("Vehicle not found.");
-            // }
-            //
-            // var auction = _auctions.FirstOrDefault(a => a.Vehicle.Id == vehicleId);
-            // if (auction != null && auction.IsActive)
-            //     throw new System.Exception("Auction is already active for this vehicle.");
-            //
-            // auction = new Auction { Vehicle = vehicle, IsActive = true, CurrentBid = 0 };
-            // _auctions.Add(auction);
+            var vehicle = await _vehicleRepository.GetVehicleByIdAsync(vehicleId);
+            if (vehicle == null)
+                throw new System.Exception("Vehicle not found.");
+        
+            var auctions = await _auctionRepository.GetAuctionsByVehicleIdAsync(vehicleId);
+
+            if (auctions.Any(a => a.VehicleId == vehicleId && a.IsActive))
+                throw new System.Exception("Auction is already active for this vehicle.");
+        
+            var auction = new Auction
+            {
+                VehicleId = vehicleId,
+                IsActive = true,
+                CurrentBid = vehicle.StartingBid,
+                StartDate = DateTime.UtcNow
+            };
+            
+            await _auctionRepository.AddAuctionAsync(auction);
+            
+            return auction;
         }
 
-        public void PlaceBid(int auctionId, decimal bidAmount)
+        public async Task PlaceBid(Guid auctionId, decimal bidAmount)
         {
-            var auction = _auctions.FirstOrDefault(a => a.Id == auctionId && a.IsActive);
-            if (auction == null)
+            var auction = await _auctionRepository.GetAuctionByIdAsync(auctionId);
+            
+            if (auction == null || !auction.IsActive)
                 throw new System.Exception("No active auction found.");
 
             if (bidAmount <= auction.CurrentBid)
                 throw new System.Exception("Bid amount must be greater than the current bid.");
 
             auction.CurrentBid = bidAmount;
+            await _auctionRepository.UpdateAuctionAsync(auction);
         }
 
-        public void CloseAuction(int auctionId)
+        public async Task CloseAuction(Guid auctionId)
         {
-            var auction = _auctions.FirstOrDefault(a => a.Id == auctionId);
+            var auction = await _auctionRepository.GetAuctionByIdAsync(auctionId);
             if (auction == null || !auction.IsActive)
                 throw new System.Exception("Auction is not active.");
 
             auction.IsActive = false;
+            auction.EndDate = DateTime.UtcNow;
+            await _auctionRepository.UpdateAuctionAsync(auction);
         }
     }

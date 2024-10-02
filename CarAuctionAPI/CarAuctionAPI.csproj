@@ -17,4 +17,11 @@
       <None Remove="CarAuctionAPI.http" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Models\Truck.cs" />
+      <Compile Remove="Models\SUV.cs" />
+      <Compile Remove="Models\Sedan.cs" />
+      <Compile Remove="Models\Hatchback.cs" />
+    </ItemGroup>
+
 </Project>

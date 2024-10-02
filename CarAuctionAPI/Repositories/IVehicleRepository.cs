@@ -1,4 +1,4 @@
-using CarAuctionAPI.Models;
+using CarAuctionAPI.Entities;
 
 namespace CarAuctionAPI.Repositories;
 

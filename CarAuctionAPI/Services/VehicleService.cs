@@ -1,4 +1,5 @@
-using CarAuctionAPI.Models;
+using CarAuctionAPI.DTOs;
+using CarAuctionAPI.Entities;
 using CarAuctionAPI.Repositories;
 
 namespace CarAuctionAPI.Services;
@@ -12,9 +13,23 @@ public class VehicleService : IVehicleService
         _vehicleRepository = vehicleRepository;
     }
 
-    public async Task AddVehicleAsync(Vehicle vehicle)
+    public async Task<Vehicle> AddVehicleAsync(VehicleDTO vehicleDto)
     {
+        var vehicle = new Vehicle()
+        {
+            VehicleType = vehicleDto.VehicleType,
+            Manufacturer = vehicleDto.Manufacturer,
+            Model = vehicleDto.Model,
+            Year = vehicleDto.Year,
+            StartingBid = vehicleDto.StartingBid,
+            NumberOfDoors = vehicleDto.NumberOfDoors,
+            NumberOfSeats = vehicleDto.NumberOfSeats,
+            LoadCapacity = vehicleDto.LoadCapacity,
+        };
+        
         await _vehicleRepository.AddVehicleAsync(vehicle);
+        
+        return vehicle;
     }
 
     public async Task<List<Vehicle>> SearchVehiclesAsync(string? vehicleType, string? manufacturer, string? model, int year)
