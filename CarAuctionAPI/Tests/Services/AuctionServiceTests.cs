@@ -31,7 +31,7 @@ namespace CarAuctionAPI.Tests.Services
                 .ReturnsAsync((Vehicle)null);
 
             // Act
-            Func<Task> act = async () => await _auctionService.StartAuction(vehicleId);
+            Func<Task> act = async () => await _auctionService.StartAuctionAsync(vehicleId);
 
             // Assert
             await act.Should().ThrowAsync<Exception>().WithMessage("Vehicle not found.");
@@ -54,7 +54,7 @@ namespace CarAuctionAPI.Tests.Services
                 .ReturnsAsync(auctions);
 
             // Act
-            Func<Task> act = async () => await _auctionService.StartAuction(vehicleId);
+            Func<Task> act = async () => await _auctionService.StartAuctionAsync(vehicleId);
 
             // Assert
             await act.Should().ThrowAsync<Exception>()
@@ -76,7 +76,7 @@ namespace CarAuctionAPI.Tests.Services
                 .ReturnsAsync((IEnumerable<Auction>)null);
 
             // Act
-            var result = await _auctionService.StartAuction(vehicleId);
+            var result = await _auctionService.StartAuctionAsync(vehicleId);
 
             // Assert
             result.Should().NotBeNull();
@@ -97,7 +97,7 @@ namespace CarAuctionAPI.Tests.Services
                 .ReturnsAsync((Auction)null);
 
             // Act
-            Func<Task> act = async () => await _auctionService.PlaceBid(auctionId, 2000);
+            Func<Task> act = async () => await _auctionService.PlaceBidAsync(auctionId, 2000);
 
             // Assert
             await act.Should().ThrowAsync<Exception>().WithMessage("No active auction found.");
@@ -115,7 +115,7 @@ namespace CarAuctionAPI.Tests.Services
                 .ReturnsAsync(auction);
 
             // Act
-            Func<Task> act = async () => await _auctionService.PlaceBid(auctionId, 1000);
+            Func<Task> act = async () => await _auctionService.PlaceBidAsync(auctionId, 1000);
 
             // Assert
             await act.Should().ThrowAsync<Exception>()
@@ -134,7 +134,7 @@ namespace CarAuctionAPI.Tests.Services
                 .ReturnsAsync(auction);
 
             // Act
-            await _auctionService.PlaceBid(auctionId, 2000);
+            await _auctionService.PlaceBidAsync(auctionId, 2000);
 
             // Assert
             auction.CurrentBid.Should().Be(2000);
@@ -159,7 +159,7 @@ namespace CarAuctionAPI.Tests.Services
                 .ReturnsAsync(auction);
 
             // Act
-            await _auctionService.CloseAuction(auctionId);
+            await _auctionService.CloseAuctionAsync(auctionId);
 
             // Assert
             Assert.False(auction.IsActive);
@@ -180,7 +180,7 @@ namespace CarAuctionAPI.Tests.Services
                 .ReturnsAsync((Auction)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<Exception>(() => _auctionService.CloseAuction(auctionId));
+            var exception = await Assert.ThrowsAsync<Exception>(() => _auctionService.CloseAuctionAsync(auctionId));
             Assert.Equal("Auction is not active.", exception.Message);
         }
 
@@ -200,8 +200,105 @@ namespace CarAuctionAPI.Tests.Services
                 .ReturnsAsync(auction);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<Exception>(() => _auctionService.CloseAuction(auctionId));
+            var exception = await Assert.ThrowsAsync<Exception>(() => _auctionService.CloseAuctionAsync(auctionId));
             Assert.Equal("Auction is not active.", exception.Message);
+        }
+        
+        [Fact]
+        public async Task GetAuctionsByVehicleIdAsync_ShouldReturnAuctions()
+        {
+            // Arrange
+            var vehicleId = Guid.NewGuid();
+            var auctions = new List<Auction>
+            {
+                new Auction
+                {
+                    Id = Guid.NewGuid(),
+                    VehicleId = vehicleId,
+                    IsActive = true,
+                    CurrentBid = 10000,
+                    StartDate = DateTime.UtcNow
+                },
+                new Auction
+                {
+                    Id = Guid.NewGuid(),
+                    VehicleId = vehicleId,
+                    IsActive = false,
+                    CurrentBid = 15000,
+                    StartDate = DateTime.UtcNow
+                }
+            };
+
+            _auctionRepositoryMock.Setup(repo => repo.GetAuctionsByVehicleIdAsync(vehicleId))
+                .ReturnsAsync(auctions);
+
+            // Act
+            var result = await _auctionService.GetAuctionsByVehicleIdAsync(vehicleId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count());
+            Assert.All(result, a => Assert.Equal(vehicleId, a.VehicleId));
+        }
+
+        [Fact]
+        public async Task GetAuctionsByVehicleIdAsync_ShouldReturnEmptyList_WhenNoAuctionsFound()
+        {
+            // Arrange
+            var vehicleId = Guid.NewGuid();
+            _auctionRepositoryMock.Setup(
+                    repo => repo.GetAuctionsByVehicleIdAsync(vehicleId))
+                .ReturnsAsync(new List<Auction>());
+
+            // Act
+            var result = await _auctionService.GetAuctionsByVehicleIdAsync(vehicleId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
+        
+        [Fact]
+        public async Task GetAuctionByIdAsync_ShouldReturnAuction()
+        {
+            // Arrange
+            var auctionId = Guid.NewGuid();
+            var auction = new Auction
+            {
+                Id = auctionId,
+                VehicleId = Guid.NewGuid(),
+                IsActive = true,
+                CurrentBid = 20000,
+                StartDate = DateTime.UtcNow
+            };
+
+            _auctionRepositoryMock.Setup(
+                    repo => repo.GetAuctionByIdAsync(auctionId))
+                .ReturnsAsync(auction);
+
+            // Act
+            var result = await _auctionService.GetAuctionByIdAsync(auctionId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(auctionId, result.Id);
+            Assert.Equal(20000, result.CurrentBid);
+        }
+
+        [Fact]
+        public async Task GetAuctionByIdAsync_ShouldReturnNull_WhenAuctionNotFound()
+        {
+            // Arrange
+            var auctionId = Guid.NewGuid();
+            _auctionRepositoryMock.Setup(
+                    repo => repo.GetAuctionByIdAsync(auctionId))
+                .ReturnsAsync((Auction)null);
+
+            // Act
+            var result = await _auctionService.GetAuctionByIdAsync(auctionId);
+
+            // Assert
+            Assert.Null(result);
         }
     }
 }

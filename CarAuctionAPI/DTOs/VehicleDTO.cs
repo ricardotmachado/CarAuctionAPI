@@ -1,3 +1,5 @@
+using CarAuctionAPI.Enums;
+
 namespace CarAuctionAPI.DTOs;
 
 public class VehicleDTO

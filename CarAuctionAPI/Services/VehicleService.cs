@@ -1,5 +1,6 @@
 using CarAuctionAPI.DTOs;
 using CarAuctionAPI.Entities;
+using CarAuctionAPI.Enums;
 using CarAuctionAPI.Repositories;
 
 namespace CarAuctionAPI.Services;
@@ -15,6 +16,14 @@ public class VehicleService : IVehicleService
 
     public async Task<Vehicle> AddVehicleAsync(VehicleDTO vehicleDto)
     {
+        if (!vehicleDto.VehicleType.Equals(VehicleType.Hatchback.ToString(), StringComparison.CurrentCultureIgnoreCase) &&
+            !vehicleDto.VehicleType.Equals(VehicleType.Sedan.ToString(), StringComparison.CurrentCultureIgnoreCase) &&
+            !vehicleDto.VehicleType.Equals(VehicleType.SUV.ToString(), StringComparison.CurrentCultureIgnoreCase) &&
+            !vehicleDto.VehicleType.Equals(VehicleType.Truck.ToString(), StringComparison.CurrentCultureIgnoreCase))
+        {
+            throw new ArgumentException("Invalid vehicle type.");
+        }
+        
         var vehicle = new Vehicle()
         {
             VehicleType = vehicleDto.VehicleType,

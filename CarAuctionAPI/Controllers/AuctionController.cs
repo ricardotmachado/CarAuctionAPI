@@ -17,8 +17,8 @@ public class AuctionController : ControllerBase
         _auctionService = auctionService;
     }
 
-    [HttpPost("add-vehicle")]
-    public async Task<IActionResult> AddVehicle([FromBody] VehicleDTO vehicleDto)
+    [HttpPost("AddVehicle")]
+    public async Task<IActionResult> AddVehicleAsync([FromBody] VehicleDTO vehicleDto)
     {
         try
         {
@@ -31,8 +31,8 @@ public class AuctionController : ControllerBase
         }
     }
 
-    [HttpGet("search")]
-    public async Task<IActionResult> SearchVehicles(string? vehicleType, string? manufacturer, string? model, int year)
+    [HttpGet("SearchVehicles")]
+    public async Task<IActionResult> SearchVehiclesAsync(string? vehicleType, string? manufacturer, string? model, int year)
     {
         try
         {
@@ -45,12 +45,12 @@ public class AuctionController : ControllerBase
         }
     }
 
-    [HttpPost("start-auction/{vehicleId}")]
-    public async Task<IActionResult> StartAuction(Guid vehicleId)
+    [HttpPost("StartAuction/{vehicleId}")]
+    public async Task<IActionResult> StartAuctionAsync(Guid vehicleId)
     {
         try
         {
-            var auction = await _auctionService.StartAuction(vehicleId);
+            var auction = await _auctionService.StartAuctionAsync(vehicleId);
             return Ok(auction);
         }
         catch (Exception ex)
@@ -59,12 +59,12 @@ public class AuctionController : ControllerBase
         }
     }
 
-    [HttpPost("place-bid/{auctionId}")]
-    public async Task<IActionResult> PlaceBid(Guid auctionId, decimal bidAmount)
+    [HttpPost("PlaceBid/{auctionId}")]
+    public async Task<IActionResult> PlaceBidAsync(Guid auctionId, decimal bidAmount)
     {
         try
         {
-            await _auctionService.PlaceBid(auctionId, bidAmount);
+            await _auctionService.PlaceBidAsync(auctionId, bidAmount);
             return Ok();
         }
         catch (Exception ex)
@@ -73,13 +73,41 @@ public class AuctionController : ControllerBase
         }
     }
 
-    [HttpPost("close-auction/{auctionId}")]
-    public async Task<IActionResult> CloseAuction(Guid auctionId)
+    [HttpPost("CloseAuction/{auctionId}")]
+    public async Task<IActionResult> CloseAuctionAsync(Guid auctionId)
     {
         try
         {
-            await _auctionService.CloseAuction(auctionId);
+            await _auctionService.CloseAuctionAsync(auctionId);
             return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+    
+    [HttpGet("SearchAuctionById")]
+    public async Task<IActionResult> SearchAuctionByIdAsync(Guid auctionId)
+    {
+        try
+        {
+            var auction = await _auctionService.GetAuctionByIdAsync(auctionId);
+            return Ok(auction);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+    
+    [HttpGet("SearchAuctionsByVehicleId")]
+    public async Task<IActionResult> SearchAuctionsByVehicleIdAsync(Guid vehicleId)
+    {
+        try
+        {
+            var auctions = await _auctionService.GetAuctionsByVehicleIdAsync(vehicleId);
+            return Ok(auctions);
         }
         catch (Exception ex)
         {
