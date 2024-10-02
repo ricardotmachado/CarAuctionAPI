@@ -22,7 +22,7 @@ namespace CarAuctionAPI.Services;
         
             var auctions = await _auctionRepository.GetAuctionsByVehicleIdAsync(vehicleId);
 
-            if (auctions.Any(a => a.VehicleId == vehicleId && a.IsActive))
+            if (auctions != null && (auctions.Any(a => a.VehicleId == vehicleId && a.IsActive)))
                 throw new System.Exception("Auction is already active for this vehicle.");
         
             var auction = new Auction

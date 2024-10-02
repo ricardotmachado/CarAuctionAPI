@@ -1,5 +1,4 @@
 using CarAuctionAPI.DTOs;
-using CarAuctionAPI.Entities;
 using CarAuctionAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,35 +20,70 @@ public class AuctionController : ControllerBase
     [HttpPost("add-vehicle")]
     public async Task<IActionResult> AddVehicle([FromBody] VehicleDTO vehicleDto)
     {
-        var vehicle = await _vehicleService.AddVehicleAsync(vehicleDto);
-        return Ok(vehicle);
+        try
+        {
+            var vehicle = await _vehicleService.AddVehicleAsync(vehicleDto);
+            return Ok(vehicle);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 
     [HttpGet("search")]
     public async Task<IActionResult> SearchVehicles(string? vehicleType, string? manufacturer, string? model, int year)
     {
-        var vehicles = await _vehicleService.SearchVehiclesAsync(vehicleType, manufacturer, model, year);
-        return Ok(vehicles);
+        try
+        {
+            var vehicles = await _vehicleService.SearchVehiclesAsync(vehicleType, manufacturer, model, year);
+            return Ok(vehicles);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 
     [HttpPost("start-auction/{vehicleId}")]
     public async Task<IActionResult> StartAuction(Guid vehicleId)
     {
-        var auction = await _auctionService.StartAuction(vehicleId);
-        return Ok(auction);
+        try
+        {
+            var auction = await _auctionService.StartAuction(vehicleId);
+            return Ok(auction);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 
     [HttpPost("place-bid/{auctionId}")]
     public async Task<IActionResult> PlaceBid(Guid auctionId, decimal bidAmount)
     {
-        await _auctionService.PlaceBid(auctionId, bidAmount);
-        return Ok();
+        try
+        {
+            await _auctionService.PlaceBid(auctionId, bidAmount);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 
     [HttpPost("close-auction/{auctionId}")]
     public async Task<IActionResult> CloseAuction(Guid auctionId)
     {
-        await _auctionService.CloseAuction(auctionId);
-        return Ok();
+        try
+        {
+            await _auctionService.CloseAuction(auctionId);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 }
