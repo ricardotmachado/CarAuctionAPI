@@ -19,6 +19,7 @@
 
     <ItemGroup>
       <None Remove="CarAuctionAPI.http" />
+      <None Remove="Tests\Repositories\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -26,6 +27,19 @@
       <Compile Remove="Models\SUV.cs" />
       <Compile Remove="Models\Sedan.cs" />
       <Compile Remove="Models\Hatchback.cs" />
+      <Compile Remove="Tests\Repositories\**" />
+      <Compile Remove="Entities\Truck.cs" />
+      <Compile Remove="Entities\SUV.cs" />
+      <Compile Remove="Entities\Sedan.cs" />
+      <Compile Remove="Entities\Hatchback.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Tests\Repositories\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="Tests\Repositories\**" />
     </ItemGroup>
 
 </Project>
